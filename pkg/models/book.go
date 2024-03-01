@@ -46,7 +46,7 @@ func (m BookModel) Get(id int) (*Book, error) {
 
 func (m BookModel) Insert(book *Book) error {
 	query := `
-		INSERT INTO book (title, author, publishedYear) 
+		INSERT INTO books (title, author, publishedYear) 
 		VALUES ($1, $2, $3) 
 		RETURNING id, created_at, updated_at
 	`
@@ -73,7 +73,7 @@ func (m BookModel) Delete(id int) error {
 func (m BookModel) Update(book *Book) error{
 	query := `
 		UPDATE books
-		SET title = $1, description = $2, nutrition_value = $3
+		SET title = $1, author = $2, publishedyear = $3
 		WHERE id = $4
 		RETURNING updated_at
 		`

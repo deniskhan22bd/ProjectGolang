@@ -66,7 +66,7 @@ func (app *application) run() {
 
 	r.HandleFunc("/books", app.CreateBook).Methods("POST")
 
-	r.HandleFunc("/books{id:[0-9]+}", app.UpdateBook).Methods("PUT")
+	r.HandleFunc("/books/{id:[0-9]+}", app.UpdateBook).Methods("PUT")
 
 	r.HandleFunc("/books/{id:[0-9]+}", app.DeleteBook).Methods("DELETE")
 
