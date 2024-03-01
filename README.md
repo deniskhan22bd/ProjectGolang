@@ -30,8 +30,8 @@
 - id: bigserial [primary key]
 - user_id: int 
 - book_id: int
-- created_at: timestamp with time zone [NOT NULL] [DEFAULT NOW()]
-- updated_at: timestamp with time zone [NOT NULL] [DEFAULT NOW()]
+- created_at: timestamp
+- updated_at: timestamp
 
 - Ref: Table users_and_books > users.id
 - Ref: Table users_and_books > books.id
