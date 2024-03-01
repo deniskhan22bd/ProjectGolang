@@ -62,13 +62,13 @@ func (app *application) run() {
 
 	r.HandleFunc("/books", app.GetBooks).Methods("GET")
 
-	r.HandleFunc("/book/{id:[0-9]+}", app.GetBook).Methods("GET")
+	r.HandleFunc("/books/{id:[0-9]+}", app.GetBook).Methods("GET")
 
-	r.HandleFunc("/book", app.CreateBook).Methods("POST")
+	r.HandleFunc("/books", app.CreateBook).Methods("POST")
 
-	r.HandleFunc("/book/{id:[0-9]+}", app.UpdateBook).Methods("PUT")
+	r.HandleFunc("/books{id:[0-9]+}", app.UpdateBook).Methods("PUT")
 
-	r.HandleFunc("/book/{id:[0-9]+}", app.DeleteBook).Methods("DELETE")
+	r.HandleFunc("/books/{id:[0-9]+}", app.DeleteBook).Methods("DELETE")
 
 	http.Handle("/", r)
 

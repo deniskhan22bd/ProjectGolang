@@ -1,0 +1,35 @@
+// Use DBML to define your database structure
+// Docs: https://dbml.dbdiagram.io/docs
+
+// Use DBML to define your database structure
+// Docs: https://dbml.dbdiagram.io/docs
+
+Table books {
+  id            : bigserial [primary key]
+  title         : varchar
+  author        : varchar
+  publishedYear : int
+  created_at    : timestamp
+  updated_at    : timestamp
+}
+
+Table users {
+  id           : bigserial [primary key]
+  name         : varchar
+  surname      : varchar
+  created_at   : timestamp 
+  updated_at   : timestamp 
+}
+
+// many-to-many
+Table users_and_books {
+  id           : bigserial [primary key]
+  user_id      : int 
+  book_id      : int
+  created_at   : timestamp with time zone
+  updated_at   : timestamp with time zone
+}
+
+Ref: Table users_and_books > users.id
+ref: Table users_and_books > books.id
+
