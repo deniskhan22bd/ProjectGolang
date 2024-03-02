@@ -2,8 +2,8 @@
 
 ## Library
 
-## API
-### BOOKS
+### API
+#### BOOKS
 - POST /books
 - GET /books
 - GET /books/:id
