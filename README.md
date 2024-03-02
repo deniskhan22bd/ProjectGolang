@@ -2,7 +2,7 @@
 
 ## Library
 
-### API
+### API STRUCTURE
 - GET /health-check
 
 #### BOOKS
