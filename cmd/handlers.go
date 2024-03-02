@@ -16,6 +16,15 @@ func (app *application) HealthCheck(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) GetBooks(w http.ResponseWriter, r *http.Request) {
+	books, err := app.models.Books.GetAll()
+	if err != nil{
+		app.respondWithError(w, http.StatusInternalServerError, "500 Internal Server Error")
+		app.models.Books.ErrorLog.Println(err)
+		return
+	}
+
+	app.respondWithJSON(w, http.StatusOK, books)
+
 
 }
 
@@ -26,6 +35,7 @@ func (app *application) GetBook(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(vars_id)
 	if err != nil || id < 1 {
 		app.respondWithError(w, http.StatusBadRequest, "Bad Request")
+		app.models.Books.ErrorLog.Println(err)
 		return
 	}
 
@@ -33,6 +43,7 @@ func (app *application) GetBook(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		app.respondWithError(w, http.StatusNotFound, "404 Not Found")
+		app.models.Books.ErrorLog.Println(err)
 		return
 	}
 
@@ -64,6 +75,7 @@ func (app *application) CreateBook(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		app.respondWithError(w, http.StatusInternalServerError, "500 Internal Server Error")
+		app.models.Books.ErrorLog.Println(err)
 		return
 	}
 
@@ -77,12 +89,14 @@ func (app *application) DeleteBook(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(param)
 	if err != nil || id < 1 {
 		app.respondWithError(w, http.StatusBadRequest, "Bad Request")
+		app.models.Books.ErrorLog.Println(err)
 		return
 	}
 
 	err = app.models.Books.Delete(id)
 	if err != nil {
 		app.respondWithError(w, http.StatusNotFound, "404 Not Found")
+		app.models.Books.ErrorLog.Println(err)
 		return
 	}
 
@@ -96,12 +110,14 @@ func (app *application) UpdateBook(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(param)
 	if err != nil || id < 1 {
 		app.respondWithError(w, http.StatusBadRequest, "Bad Request")
+		app.models.Books.ErrorLog.Println(err)
 		return
 	}
 
 	book, err := app.models.Books.Get(id)
 	if err != nil {
 		app.respondWithError(w, http.StatusNotFound, "404 Not Found")
+		app.models.Books.ErrorLog.Println(err)
 		return
 	}
 
@@ -134,6 +150,7 @@ func (app *application) UpdateBook(w http.ResponseWriter, r *http.Request) {
 	err = app.models.Books.Update(book)
 	if err != nil {
 		app.respondWithError(w, http.StatusInternalServerError, "500 Internal Server Error")
+		app.models.Books.ErrorLog.Println(err)
 		return
 	}
 

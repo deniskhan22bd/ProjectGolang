@@ -22,6 +22,34 @@ type BookModel struct {
 	ErrorLog *log.Logger
 }
 
+func (m BookModel) GetAll() ([]Book, error){
+	query := `SELECT * FROM books`
+
+	var books []Book
+	var book Book
+	// ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	// defer cancel()
+
+	rows, err := m.DB.Query(query)
+	if err != nil {
+		m.ErrorLog.Println(err)
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		err := rows.Scan(&book.Id, &book.Title, &book.Author, &book.PublishedYear, &book.CreatedAt, &book.UpdatedAt)
+		if err != nil {
+			m.ErrorLog.Println(err)
+			return nil, err
+		}
+		m.InfoLog.Println(book)
+		books = append(books, book)
+	}
+
+	return books, nil
+}
+
 func (m BookModel) Get(id int) (*Book, error) {
 	query := `
 		SELECT id, title, author, publishedYear, created_at, updated_at
@@ -70,7 +98,7 @@ func (m BookModel) Delete(id int) error {
 	return err
 }
 
-func (m BookModel) Update(book *Book) error{
+func (m BookModel) Update(book *Book) error {
 	query := `
 		UPDATE books
 		SET title = $1, author = $2, publishedyear = $3

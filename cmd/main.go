@@ -46,6 +46,7 @@ func main() {
 	}
 
 	app.run()
+	// app.models.Books.GetAll()
 }
 
 func openDB(cfg config) (*sql.DB, error) {
