@@ -3,13 +3,14 @@
 ## Library
 
 ### API
+- GET /health-check
+
 #### BOOKS
 - POST /books
 - GET /books
 - GET /books/:id
 - PUT /books/:id
 - DELETE /books/:id
-- GET /health-check
 
 ### DB STRUCTURE
 #### Table books
