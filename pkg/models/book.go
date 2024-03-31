@@ -3,7 +3,7 @@ package models
 import (
 	"context"
 	"database/sql"
-	"log"
+	"github.com/deniskhan22bd/Golang/ProjectGolang/pkg/jsonlog"
 	"time"
 )
 
@@ -17,22 +17,21 @@ type Book struct {
 }
 
 type BookModel struct {
-	DB       *sql.DB
-	InfoLog  *log.Logger
-	ErrorLog *log.Logger
+	DB     *sql.DB
+	Logger *jsonlog.Logger
 }
 
-func (m BookModel) GetAll() ([]Book, error){
+func (m BookModel) GetAll() ([]Book, error) {
 	query := `SELECT * FROM books`
 
 	var books []Book
 	var book Book
-	// ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
-	// defer cancel()
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
 
-	rows, err := m.DB.Query(query)
+	rows, err := m.DB.QueryContext(ctx, query)
 	if err != nil {
-		m.ErrorLog.Println(err)
+		m.Logger.PrintError(err, nil)
 		return nil, err
 	}
 	defer rows.Close()
@@ -40,10 +39,9 @@ func (m BookModel) GetAll() ([]Book, error){
 	for rows.Next() {
 		err := rows.Scan(&book.Id, &book.Title, &book.Author, &book.PublishedYear, &book.CreatedAt, &book.UpdatedAt)
 		if err != nil {
-			m.ErrorLog.Println(err)
+			m.Logger.PrintError(err, nil)
 			return nil, err
 		}
-		m.InfoLog.Println(book)
 		books = append(books, book)
 	}
 

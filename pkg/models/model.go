@@ -2,7 +2,7 @@ package models
 
 import (
 	"database/sql"
-	"log"
+	"github.com/deniskhan22bd/Golang/ProjectGolang/pkg/jsonlog"
 	"os"
 )
 
@@ -12,18 +12,15 @@ type Models struct {
 }
 
 func NewModels(db *sql.DB) Models {
-	infoLog := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
-	errorLog := log.New(os.Stderr, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
+	logger := jsonlog.NewLogger(os.Stdout, jsonlog.LevelInfo)
 	return Models{
 		Books: BookModel{
-			DB: db,
-			InfoLog: infoLog,
-			ErrorLog: errorLog,
+			DB:       db,
+			Logger: logger,
 		},
 		Users: UserModel{
-			DB: db,
-			InfoLog: infoLog,
-			ErrorLog: errorLog,
+			DB:       db,
+			Logger: logger,
 		},
 	}
 }

@@ -2,30 +2,21 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
-	"net/http"
-	"strconv"
-
 	"github.com/deniskhan22bd/Golang/ProjectGolang/pkg/models"
 	"github.com/gorilla/mux"
+	"net/http"
+	"strconv"
 )
-
-func (app *application) HealthCheck(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusOK)
-	fmt.Fprintf(w, "App is running! \nWeb app about books by Khan Denis")
-}
 
 func (app *application) GetBooks(w http.ResponseWriter, r *http.Request) {
 	books, err := app.models.Books.GetAll()
-	if err != nil{
+	if err != nil {
 		app.respondWithError(w, http.StatusInternalServerError, "500 Internal Server Error")
-		app.models.Books.ErrorLog.Println(err)
+		app.models.Books.Logger.PrintError(err, nil)
 		return
 	}
 
 	app.respondWithJSON(w, http.StatusOK, books)
-
-
 }
 
 func (app *application) GetBook(w http.ResponseWriter, r *http.Request) {
@@ -35,7 +26,7 @@ func (app *application) GetBook(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(vars_id)
 	if err != nil || id < 1 {
 		app.respondWithError(w, http.StatusBadRequest, "Bad Request")
-		app.models.Books.ErrorLog.Println(err)
+		app.models.Books.Logger.PrintError(err, nil)
 		return
 	}
 
@@ -43,7 +34,7 @@ func (app *application) GetBook(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		app.respondWithError(w, http.StatusNotFound, "404 Not Found")
-		app.models.Books.ErrorLog.Println(err)
+		app.models.Books.Logger.PrintError(err, nil)
 		return
 	}
 
@@ -61,7 +52,7 @@ func (app *application) CreateBook(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		app.respondWithError(w, http.StatusBadRequest, "Invalid request payload")
-		app.models.Books.ErrorLog.Println(err)
+		app.models.Books.Logger.PrintError(err, nil)
 		return
 	}
 
@@ -75,7 +66,7 @@ func (app *application) CreateBook(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		app.respondWithError(w, http.StatusInternalServerError, "500 Internal Server Error")
-		app.models.Books.ErrorLog.Println(err)
+		app.models.Books.Logger.PrintError(err, nil)
 		return
 	}
 
@@ -89,14 +80,14 @@ func (app *application) DeleteBook(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(param)
 	if err != nil || id < 1 {
 		app.respondWithError(w, http.StatusBadRequest, "Bad Request")
-		app.models.Books.ErrorLog.Println(err)
+		app.models.Books.Logger.PrintError(err, nil)
 		return
 	}
 
 	err = app.models.Books.Delete(id)
 	if err != nil {
 		app.respondWithError(w, http.StatusNotFound, "404 Not Found")
-		app.models.Books.ErrorLog.Println(err)
+		app.models.Books.Logger.PrintError(err, nil)
 		return
 	}
 
@@ -110,14 +101,14 @@ func (app *application) UpdateBook(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(param)
 	if err != nil || id < 1 {
 		app.respondWithError(w, http.StatusBadRequest, "Bad Request")
-		app.models.Books.ErrorLog.Println(err)
+		app.models.Books.Logger.PrintError(err, nil)
 		return
 	}
 
 	book, err := app.models.Books.Get(id)
 	if err != nil {
 		app.respondWithError(w, http.StatusNotFound, "404 Not Found")
-		app.models.Books.ErrorLog.Println(err)
+		app.models.Books.Logger.PrintError(err, nil)
 		return
 	}
 
@@ -131,7 +122,7 @@ func (app *application) UpdateBook(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		app.respondWithError(w, http.StatusBadRequest, "Invalid request payload")
-		app.models.Books.ErrorLog.Println(err)
+		app.models.Books.Logger.PrintError(err, nil)
 		return
 	}
 
@@ -150,24 +141,12 @@ func (app *application) UpdateBook(w http.ResponseWriter, r *http.Request) {
 	err = app.models.Books.Update(book)
 	if err != nil {
 		app.respondWithError(w, http.StatusInternalServerError, "500 Internal Server Error")
-		app.models.Books.ErrorLog.Println(err)
+		app.models.Books.Logger.PrintError(err, nil)
 		return
 	}
 
 	app.respondWithJSON(w, http.StatusOK, book)
 
-}
-func (app *application) readJSON(w http.ResponseWriter, r *http.Request, dst interface{}) error {
-	dec := json.NewDecoder(r.Body)
-	defer r.Body.Close()
-	dec.DisallowUnknownFields()
-
-	err := dec.Decode(dst)
-	if err != nil {
-		return err
-	}
-
-	return nil
 }
 
 func (app *application) respondWithError(w http.ResponseWriter, code int, message string) {
