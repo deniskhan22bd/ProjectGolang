@@ -1,44 +1,78 @@
 package main
 
 import (
-	"encoding/json"
-	"github.com/deniskhan22bd/Golang/ProjectGolang/pkg/models"
-	"github.com/gorilla/mux"
+	"errors"
 	"net/http"
-	"strconv"
+
+	"github.com/deniskhan22bd/Golang/ProjectGolang/pkg/models"
+	"github.com/deniskhan22bd/Golang/ProjectGolang/pkg/validator"
 )
 
 func (app *application) GetBooks(w http.ResponseWriter, r *http.Request) {
-	books, err := app.models.Books.GetAll()
-	if err != nil {
-		app.respondWithError(w, http.StatusInternalServerError, "500 Internal Server Error")
-		app.models.Books.Logger.PrintError(err, nil)
-		return
+	var input struct {
+		Title         string
+		Author        string
+		PublishedYear int
+		models.Filters
 	}
 
-	app.respondWithJSON(w, http.StatusOK, books)
+	v := validator.New()
+	qs := r.URL.Query()
+	// Use our helpers to extract the title, author, publishedyear value range query string values, falling back to the
+	// defaults of an empty string and an empty slice, respectively, if they are not provided
+	// by the client.
+	input.Title = app.readString(qs, "title", "")
+	input.Author = app.readString(qs, "author", "")
+	input.PublishedYear = app.readInt(qs, "publishedyear", 1, v)
+	// Get the page and page_size query string value as integers. Notice that we set the default
+	// page value to 1 and default page_size to 20, and that we pass the validator instance
+	// as the final argument.
+	input.Filters.Page = app.readInt(qs, "page", 1, v)
+	input.Filters.PageSize = app.readInt(qs, "page_size", 20, v)
+	// Extract the sort query string value, falling back to "id" if it is not provided
+	// by the client (which will imply an ascending sort on menu ID).
+	input.Filters.Sort = app.readString(qs, "sort", "id")
+	// Add the supported sort values for this endpoint to the sort safelist.
+	input.Filters.SortSafelist = []string{"id", "title", "author", "publishedyear", "", "-id", "-title", "-author", "-publishedyear"}
+	// Execute the validation checks on the Filters struct and send a response
+	// containing the errors if necessary.
+	if models.ValidateFilters(v, input.Filters); !v.Valid() {
+		app.failedValidationResponse(w, r, v.Errors)
+		return
+	}
+	// Call the GetAll() method to retrieve the movies, passing in the various filter
+	// parameters.
+	books, metadata, err := app.models.Books.GetAll(input.Title, input.Author, input.Filters)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+		return
+	}
+	err = app.writeJSON(w, http.StatusOK, envelope{"books" : books, "metadata" : metadata}, nil)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+	}
 }
 
 func (app *application) GetBook(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	vars_id := vars["id"]
-
-	id, err := strconv.Atoi(vars_id)
+	id, err := app.readIDParam(r)
 	if err != nil || id < 1 {
-		app.respondWithError(w, http.StatusBadRequest, "Bad Request")
-		app.models.Books.Logger.PrintError(err, nil)
+		app.notFoundResponse(w, r)
 		return
 	}
 
 	book, err := app.models.Books.Get(id)
 
 	if err != nil {
-		app.respondWithError(w, http.StatusNotFound, "404 Not Found")
-		app.models.Books.Logger.PrintError(err, nil)
+		switch {
+		case errors.Is(err, models.ErrRecordNotFound):
+			app.notFoundResponse(w, r)
+		default:
+			app.serverErrorResponse(w, r, err)
+		}
 		return
 	}
 
-	app.respondWithJSON(w, http.StatusOK, book)
+	app.writeJSON(w, http.StatusOK, envelope{"book": book}, nil)
 }
 
 func (app *application) CreateBook(w http.ResponseWriter, r *http.Request) {
@@ -51,8 +85,7 @@ func (app *application) CreateBook(w http.ResponseWriter, r *http.Request) {
 	err := app.readJSON(w, r, &input)
 
 	if err != nil {
-		app.respondWithError(w, http.StatusBadRequest, "Invalid request payload")
-		app.models.Books.Logger.PrintError(err, nil)
+		app.errorResponse(w, r, http.StatusBadRequest, "Invalid request payload")
 		return
 	}
 
@@ -65,50 +98,49 @@ func (app *application) CreateBook(w http.ResponseWriter, r *http.Request) {
 	err = app.models.Books.Insert(book)
 
 	if err != nil {
-		app.respondWithError(w, http.StatusInternalServerError, "500 Internal Server Error")
-		app.models.Books.Logger.PrintError(err, nil)
+		app.serverErrorResponse(w, r, err)
 		return
 	}
 
-	app.respondWithJSON(w, http.StatusCreated, book)
+	app.writeJSON(w, http.StatusCreated, envelope{"book": book}, nil)
 }
 
 func (app *application) DeleteBook(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	param := vars["id"]
-
-	id, err := strconv.Atoi(param)
+	id, err := app.readIDParam(r)
 	if err != nil || id < 1 {
-		app.respondWithError(w, http.StatusBadRequest, "Bad Request")
-		app.models.Books.Logger.PrintError(err, nil)
+		app.notFoundResponse(w, r)
 		return
 	}
 
 	err = app.models.Books.Delete(id)
 	if err != nil {
-		app.respondWithError(w, http.StatusNotFound, "404 Not Found")
-		app.models.Books.Logger.PrintError(err, nil)
+		switch {
+		case errors.Is(err, models.ErrRecordNotFound):
+			app.notFoundResponse(w, r)
+		default:
+			app.serverErrorResponse(w, r, err)
+		}
 		return
 	}
 
-	app.respondWithJSON(w, http.StatusOK, map[string]string{"result": "success"})
+	app.writeJSON(w, http.StatusOK, envelope{"message": "success"}, nil)
 }
 
 func (app *application) UpdateBook(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	param := vars["id"]
-
-	id, err := strconv.Atoi(param)
+	id, err := app.readIDParam(r)
 	if err != nil || id < 1 {
-		app.respondWithError(w, http.StatusBadRequest, "Bad Request")
-		app.models.Books.Logger.PrintError(err, nil)
+		app.notFoundResponse(w, r)
 		return
 	}
 
 	book, err := app.models.Books.Get(id)
 	if err != nil {
-		app.respondWithError(w, http.StatusNotFound, "404 Not Found")
-		app.models.Books.Logger.PrintError(err, nil)
+		switch {
+		case errors.Is(err, models.ErrRecordNotFound):
+			app.notFoundResponse(w, r)
+		default:
+			app.serverErrorResponse(w, r, err)
+		}
 		return
 	}
 
@@ -121,8 +153,7 @@ func (app *application) UpdateBook(w http.ResponseWriter, r *http.Request) {
 	err = app.readJSON(w, r, &input)
 
 	if err != nil {
-		app.respondWithError(w, http.StatusBadRequest, "Invalid request payload")
-		app.models.Books.Logger.PrintError(err, nil)
+		app.badRequestResponse(w, r, err)
 		return
 	}
 
@@ -138,30 +169,19 @@ func (app *application) UpdateBook(w http.ResponseWriter, r *http.Request) {
 		book.PublishedYear = *input.PublishedYear
 	}
 
+	v := validator.New()
+
+	if models.ValidateBook(v, book); !v.Valid() {
+		app.failedValidationResponse(w, r, v.Errors)
+		return
+	}
+
 	err = app.models.Books.Update(book)
 	if err != nil {
-		app.respondWithError(w, http.StatusInternalServerError, "500 Internal Server Error")
-		app.models.Books.Logger.PrintError(err, nil)
+		app.serverErrorResponse(w, r, err)
 		return
 	}
 
-	app.respondWithJSON(w, http.StatusOK, book)
+	app.writeJSON(w, http.StatusOK, envelope{"book": book}, nil)
 
-}
-
-func (app *application) respondWithError(w http.ResponseWriter, code int, message string) {
-	app.respondWithJSON(w, code, map[string]string{"error": message})
-}
-
-func (app *application) respondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
-	response, err := json.Marshal(payload)
-
-	if err != nil {
-		app.respondWithError(w, http.StatusInternalServerError, "500 Internal Server Error")
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(code)
-	w.Write(response)
 }

@@ -6,9 +6,9 @@ import (
 	"crypto/sha256"
 	"database/sql"
 	"encoding/base32"
+	"log"
 	"time"
 
-	"github.com/deniskhan22bd/Golang/ProjectGolang/pkg/jsonlog"
 	"github.com/deniskhan22bd/Golang/ProjectGolang/pkg/validator"
 )
 
@@ -31,7 +31,8 @@ type Token struct {
 
 type TokenModel struct {
 	DB     *sql.DB
-	Logger *jsonlog.Logger
+	InfoLog  *log.Logger
+	ErrorLog *log.Logger
 }
 
 func (m TokenModel) New(userID int64, ttl time.Duration, scope string) (*Token, error) {

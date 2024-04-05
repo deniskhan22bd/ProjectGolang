@@ -2,25 +2,34 @@ package models
 
 import (
 	"database/sql"
-	"github.com/deniskhan22bd/Golang/ProjectGolang/pkg/jsonlog"
+	"log"
 	"os"
 )
 
 type Models struct {
-	Books BookModel
-	Users UserModel
+	Books  BookModel
+	Users  UserModel
+	Tokens TokenModel
 }
 
 func NewModels(db *sql.DB) Models {
-	logger := jsonlog.NewLogger(os.Stdout, jsonlog.LevelInfo)
+	infoLog := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
+	errorLog := log.New(os.Stderr, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
 	return Models{
 		Books: BookModel{
-			DB:       db,
-			Logger: logger,
+			DB:     db,
+			InfoLog:  infoLog,
+			ErrorLog: errorLog,
 		},
 		Users: UserModel{
-			DB:       db,
-			Logger: logger,
+			DB:     db,
+			InfoLog:  infoLog,
+			ErrorLog: errorLog,
+		},
+		Tokens: TokenModel{
+			DB:     db,
+			InfoLog:  infoLog,
+			ErrorLog: errorLog,
 		},
 	}
 }

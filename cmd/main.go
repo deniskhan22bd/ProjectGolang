@@ -42,17 +42,25 @@ func main() {
 	// Connect to DB
 	db, err := openDB(cfg)
 	if err != nil {
-		logger.PrintError(err, nil)
+		logger.PrintFatal(err, nil)
 		return
 	}
 	defer db.Close()
+	logger.PrintInfo("database connection pool established", nil)
 
 	app := &application{
 		config: cfg,
 		models: models.NewModels(db),
 		logger: logger,
 	}
-
+	// Again, we use the PrintInfo() method to write a "starting server" message at the
+	// INFO level. But this time we pass a map containing additional properties (the
+	// operating environment and server address) as the final parameter.
+	logger.PrintInfo("starting server", map[string]string{
+		"addr": cfg.port,
+		"env":  cfg.env,
+	})
+	
 	app.run()
 }
 
@@ -66,16 +74,15 @@ func openDB(cfg config) (*sql.DB, error) {
 
 func (app *application) run() {
 	r := mux.NewRouter()
-	
+
 	r.HandleFunc("/books", app.GetBooks).Methods("GET")
-	r.HandleFunc("/books/{id:[0-9]+}", app.GetBook).Methods("GET")
 	r.HandleFunc("/books", app.CreateBook).Methods("POST")
+	r.HandleFunc("/books/{id:[0-9]+}", app.GetBook).Methods("GET")
 	r.HandleFunc("/books/{id:[0-9]+}", app.UpdateBook).Methods("PUT")
 	r.HandleFunc("/books/{id:[0-9]+}", app.DeleteBook).Methods("DELETE")
 
-
 	r.HandleFunc("/users", app.registerUserHandler).Methods("POST")
-
+	r.HandleFunc("/users/activate", app.activateUserHandler).Methods("POST")
 	http.Handle("/", r)
 	log.Printf("starting server on %s\n", app.config.port)
 	err := http.ListenAndServe(app.config.port, r)
