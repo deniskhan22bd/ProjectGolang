@@ -17,6 +17,8 @@ type password struct {
 	hash      []byte
 }
 
+var AnonymousUser = &User{}
+
 type User struct {
 	ID        int64    `json:"id"`
 	Name      string   `json:"name"`
@@ -29,7 +31,7 @@ type User struct {
 }
 
 type UserModel struct {
-	DB *sql.DB
+	DB       *sql.DB
 	InfoLog  *log.Logger
 	ErrorLog *log.Logger
 }
@@ -40,6 +42,11 @@ var (
 	ErrRecordNotFound = errors.New("record not found")
 	ErrEditConflict   = errors.New("edit conflict")
 )
+
+// Check if a User instance is the AnonymousUser.
+func (u *User) IsAnonymous() bool {
+	return u == AnonymousUser
+}
 
 func (m UserModel) Insert(user *User) error {
 	query := `

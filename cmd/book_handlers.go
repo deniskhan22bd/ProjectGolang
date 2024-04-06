@@ -33,7 +33,7 @@ func (app *application) GetBooks(w http.ResponseWriter, r *http.Request) {
 	// by the client (which will imply an ascending sort on menu ID).
 	input.Filters.Sort = app.readString(qs, "sort", "id")
 	// Add the supported sort values for this endpoint to the sort safelist.
-	input.Filters.SortSafelist = []string{"id", "title", "author", "publishedyear", "", "-id", "-title", "-author", "-publishedyear"}
+	input.Filters.SortSafelist = []string{"id", "title", "author", "publishedyear", "-id", "-title", "-author", "-publishedyear"}
 	// Execute the validation checks on the Filters struct and send a response
 	// containing the errors if necessary.
 	if models.ValidateFilters(v, input.Filters); !v.Valid() {
@@ -47,7 +47,7 @@ func (app *application) GetBooks(w http.ResponseWriter, r *http.Request) {
 		app.serverErrorResponse(w, r, err)
 		return
 	}
-	err = app.writeJSON(w, http.StatusOK, envelope{"books" : books, "metadata" : metadata}, nil)
+	err = app.writeJSON(w, http.StatusOK, envelope{"books": books, "metadata": metadata}, nil)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 	}

@@ -3,7 +3,6 @@ package main
 import (
 	"database/sql"
 	"flag"
-	"log"
 	"net/http"
 	"os"
 
@@ -60,8 +59,11 @@ func main() {
 		"addr": cfg.port,
 		"env":  cfg.env,
 	})
-	
-	app.run()
+
+	err = app.run()
+	if err != nil {
+		logger.PrintFatal(err, nil)
+	}
 }
 
 func openDB(cfg config) (*sql.DB, error) {
@@ -72,7 +74,7 @@ func openDB(cfg config) (*sql.DB, error) {
 	return db, nil
 }
 
-func (app *application) run() {
+func (app *application) run() error {
 	r := mux.NewRouter()
 
 	r.HandleFunc("/books", app.GetBooks).Methods("GET")
@@ -83,8 +85,11 @@ func (app *application) run() {
 
 	r.HandleFunc("/users", app.registerUserHandler).Methods("POST")
 	r.HandleFunc("/users/activate", app.activateUserHandler).Methods("POST")
+	r.HandleFunc("/users/login", app.createAuthenticationTokenHandler).Methods("POST")
 	http.Handle("/", r)
-	log.Printf("starting server on %s\n", app.config.port)
 	err := http.ListenAndServe(app.config.port, r)
-	log.Fatal(err)
+	if err != nil {
+		return err
+	}
+	return nil
 }
