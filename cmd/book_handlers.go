@@ -122,7 +122,7 @@ func (app *application) DeleteBook(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	app.models.Books.Delete(id)
-	app.writeJSON(w, http.StatusOK, envelope{"message": "success", "deleted_book" : book}, nil)
+	app.writeJSON(w, http.StatusOK, envelope{"message": "success", "deleted_book": book}, nil)
 }
 
 func (app *application) UpdateBook(w http.ResponseWriter, r *http.Request) {

@@ -27,7 +27,7 @@ func (p Permissions) Include(code string) bool {
 
 // Define the PermissionModel type.
 type PermissionModel struct {
-	DB *sql.DB
+	DB       *sql.DB
 	InfoLog  *log.Logger
 	ErrorLog *log.Logger
 }
@@ -77,4 +77,4 @@ func (m PermissionModel) AddForUser(userID int64, codes ...string) error {
 	defer cancel()
 	_, err := m.DB.ExecContext(ctx, query, userID, pq.Array(codes))
 	return err
-	}
+}
