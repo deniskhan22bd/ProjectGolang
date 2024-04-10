@@ -27,7 +27,7 @@ type BookModel struct {
 
 func (m BookModel) GetAll(title string, author string, filters Filters) ([]*Book, Metadata, error) {
 	query := fmt.Sprintf(`
-		SELECT count(*) OVER(), id, title, author, publishedyear, created_at
+		SELECT count(*) OVER(), id, title, author, publishedyear, created_at, updated_at
 		FROM books
 		WHERE (to_tsvector('simple', title) @@ plainto_tsquery('simple', $1) OR $1 = '')
 		AND (to_tsvector('simple', author) @@ plainto_tsquery('simple', $2) OR $2 = '')
@@ -59,6 +59,7 @@ func (m BookModel) GetAll(title string, author string, filters Filters) ([]*Book
 			&book.Author,
 			&book.PublishedYear,
 			&book.CreatedAt,
+			&book.UpdatedAt,
 		)
 
 		if err != nil {

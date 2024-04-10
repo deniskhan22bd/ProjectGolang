@@ -111,8 +111,7 @@ func (app *application) DeleteBook(w http.ResponseWriter, r *http.Request) {
 		app.notFoundResponse(w, r)
 		return
 	}
-
-	err = app.models.Books.Delete(id)
+	book, err := app.models.Books.Get(id)
 	if err != nil {
 		switch {
 		case errors.Is(err, models.ErrRecordNotFound):
@@ -122,8 +121,8 @@ func (app *application) DeleteBook(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
-
-	app.writeJSON(w, http.StatusOK, envelope{"message": "success"}, nil)
+	app.models.Books.Delete(id)
+	app.writeJSON(w, http.StatusOK, envelope{"message": "success", "deleted_book" : book}, nil)
 }
 
 func (app *application) UpdateBook(w http.ResponseWriter, r *http.Request) {

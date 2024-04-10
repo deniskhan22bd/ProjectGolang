@@ -10,6 +10,8 @@ type Models struct {
 	Books  BookModel
 	Users  UserModel
 	Tokens TokenModel
+	Permissions PermissionModel
+
 }
 
 func NewModels(db *sql.DB) Models {
@@ -29,6 +31,11 @@ func NewModels(db *sql.DB) Models {
 		Tokens: TokenModel{
 			DB:       db,
 			InfoLog:  infoLog,
+			ErrorLog: errorLog,
+		},
+		Permissions: PermissionModel{
+			DB: db,
+			InfoLog: infoLog,
 			ErrorLog: errorLog,
 		},
 	}

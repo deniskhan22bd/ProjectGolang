@@ -60,8 +60,12 @@ func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Reque
 		}
 		return
 	}
-	// Write a JSON response containing the user data along with a 201 Created status
-	// code.
+	// Add the "movies:read" permission for the new user.
+	err = app.models.Permissions.AddForUser(user.ID, "books:read")
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+		return
+	}
 
 	token, err := app.models.Tokens.New(user.ID, 3*24*time.Hour, models.ScopeActivation)
 	if err != nil {
