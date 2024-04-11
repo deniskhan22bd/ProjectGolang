@@ -1,7 +1,18 @@
 # ProjectGolang
 
 ## Library
+Library application, where user can view book, subscribe and comment them
 
+
+### GIVE PERMISSIONS FOR CREATED USER
+```sql
+INSERT INTO users_permissions (user_id, permission_id)
+VALUES
+    ((SELECT id FROM users WHERE email = 'example@gmail.com'), (SELECT id FROM permissions WHERE code = 'books:write')),
+    ((SELECT id FROM users WHERE email = 'example@gmail.com'), (SELECT id FROM permissions WHERE code = 'books:delete'));
+```
+
+    
 ### API STRUCTURE
 - GET /health-check
 
