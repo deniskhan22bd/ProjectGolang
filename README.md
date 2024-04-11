@@ -1,6 +1,7 @@
 # ProjectGolang
 
 ## Library
+Library application, where user can view book, subscribe and comment them
 
 
 ### GIVE PERMISSIONS FOR CREATED USER
