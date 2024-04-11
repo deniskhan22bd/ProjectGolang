@@ -3,8 +3,16 @@ up:
 	migrate -path='./pkg/migrations' -database='postgres://postgres:123@localhost/golang_project?sslmode=disable' up
 
 down:
-	@echo 'Running up migrations...'
+	@echo 'Running down migrations...'
 	migrate -path='./pkg/migrations' -database='postgres://postgres:123@localhost/golang_project?sslmode=disable' down
+	@echo y
+
+run:
+	@echo "Running run server..."
+	make down
+	make up
+	go run ./cmd
+
 
 migration:
 	@echo 'Creating migration files for ${name}...'

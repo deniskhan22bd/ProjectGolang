@@ -97,7 +97,7 @@ func (m BookModel) Get(id int) (*Book, error) {
 	err := row.Scan(&book.Id, &book.Title, &book.Author, &book.PublishedYear, &book.CreatedAt, &book.UpdatedAt)
 
 	if err != nil {
-		return nil, err
+		return nil, ErrRecordNotFound
 	}
 
 	return &book, nil
@@ -136,7 +136,7 @@ func (m BookModel) Update(book *Book) error {
 
 	query := `
 		UPDATE books
-		SET title = $1, author = $2, publishedyear = $3
+		SET title = $1, author = $2, publishedyear = $3, updated_at = NOW()
 		WHERE id = $4
 		RETURNING updated_at
 		`
