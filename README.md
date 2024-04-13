@@ -1,7 +1,8 @@
 # ProjectGolang
 
 ## Library
-Library application, where user can view book, subscribe and comment them
+Library application, where user can view book, subscribe and comment them.
+Token based authentication - Stateless tokens
 
 
 ### GIVE PERMISSIONS FOR CREATED USER
@@ -11,6 +12,11 @@ VALUES
     ((SELECT id FROM users WHERE email = 'example@gmail.com'), (SELECT id FROM permissions WHERE code = 'books:write')),
     ((SELECT id FROM users WHERE email = 'example@gmail.com'), (SELECT id FROM permissions WHERE code = 'books:delete'));
 ```
+#### USERS
+- POST /users - registration
+- POST /users/activate
+- POST /users/login
+
 #### BOOKS
 - POST /books
 - GET /books
