@@ -11,11 +11,6 @@ VALUES
     ((SELECT id FROM users WHERE email = 'example@gmail.com'), (SELECT id FROM permissions WHERE code = 'books:write')),
     ((SELECT id FROM users WHERE email = 'example@gmail.com'), (SELECT id FROM permissions WHERE code = 'books:delete'));
 ```
-
-    
-### API STRUCTURE
-- GET /health-check
-
 #### BOOKS
 - POST /books
 - GET /books
