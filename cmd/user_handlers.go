@@ -9,6 +9,86 @@ import (
 	"github.com/deniskhan22bd/Golang/ProjectGolang/pkg/validator"
 )
 
+func (app *application) AddFavoriteBook(w http.ResponseWriter, r *http.Request) {
+	token, err := app.GetToken(w, r)
+	if err != nil {
+		app.invalidCredentialsResponse(w, r)
+		return
+	}
+	// Retrieve the details of the user associated with the authentication token,
+	// again calling the invalidAuthenticationTokenResponse() helper if no
+	// matching record was found. IMPORTANT: Notice that we are using
+	// ScopeAuthentication as the first parameter here.
+	user, err := app.models.Users.GetByToken(models.ScopeAuthentication, token)
+	if err != nil {
+		switch {
+		case errors.Is(err, models.ErrRecordNotFound):
+			app.invalidAuthenticationTokenResponse(w, r)
+		default:
+			app.serverErrorResponse(w, r, err)
+		}
+		return
+	}
+
+	id, err := app.readIDParam(r)
+	if err != nil || id < 1 {
+		app.notFoundResponse(w, r)
+		return
+	}
+
+	book, err := app.models.Books.Get(id)
+
+	if err != nil {
+		switch {
+		case errors.Is(err, models.ErrRecordNotFound):
+			app.notFoundResponse(w, r)
+		default:
+			app.serverErrorResponse(w, r, err)
+		}
+		return
+	}
+
+	err = app.models.Users.Subcribe(int(book.Id), int(user.ID))
+
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+		return
+	}
+
+	app.writeJSON(w, http.StatusCreated, envelope{"subscribe at": book}, nil)
+}
+
+func (app *application) GetFavoriteBooks(w http.ResponseWriter, r *http.Request) {
+	token, err := app.GetToken(w, r)
+
+	if err != nil {
+		app.invalidCredentialsResponse(w, r)
+		return
+	}
+
+	user, err := app.models.Users.GetByToken(models.ScopeAuthentication, token)
+	if err != nil {
+		switch {
+		case errors.Is(err, models.ErrRecordNotFound):
+			app.invalidAuthenticationTokenResponse(w, r)
+		default:
+			app.serverErrorResponse(w, r, err)
+		}
+		return
+	}
+	books, err := app.models.Users.GetFavorites(int(user.ID))
+	if err != nil {
+		switch {
+		case errors.Is(err, models.ErrRecordNotFound):
+			app.notFoundResponse(w, r)
+		default:
+			app.serverErrorResponse(w, r, err)
+		}
+		return
+	}
+	app.writeJSON(w, http.StatusOK, envelope{"favorite books": books}, nil)
+}
+
 func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Request) {
 	// Create an anonymous struct to hold the expected data from the request body.
 	var input struct {

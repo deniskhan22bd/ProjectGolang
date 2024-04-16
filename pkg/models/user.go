@@ -48,6 +48,71 @@ func (u *User) IsAnonymous() bool {
 	return u == AnonymousUser
 }
 
+func (m UserModel) Subcribe(book_id int, user_id int) error {
+	query := `
+	INSERT INTO users_books (user_id, book_id) VALUES ($1, $2);
+	`
+	args := []interface{}{user_id, book_id}
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	_, err := m.DB.ExecContext(ctx, query, args...)
+	if err != nil {
+		switch {
+		case err.Error() == `pq: duplicate key value violates unique constraint "users_email_key"`:
+			return ErrDuplicateEmail
+		default:
+			return err
+		}
+	}
+	return nil
+}
+
+func (m UserModel) GetFavorites(id int) ([]*Book, error) {
+	if id < 1 {
+		return nil, ErrRecordNotFound
+	}
+
+	query := `
+	SELECT id, title, author, publishedyear, created_at, updated_at
+	FROM users_books ub
+	JOIN books b ON ub.book_id = b.id
+	WHERE ub.user_id = $1;
+	`
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+	rows, err := m.DB.QueryContext(ctx, query, id)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	books := []*Book{}
+
+	for rows.Next() {
+		var book Book
+
+		err := rows.Scan(
+			&book.Id,
+			&book.Title,
+			&book.Author,
+			&book.PublishedYear,
+			&book.CreatedAt,
+			&book.UpdatedAt,
+		)
+		if err != nil {
+			return nil, err
+		}
+		books = append(books, &book)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return books, nil
+}
+
 func (m UserModel) Insert(user *User) error {
 	query := `
 	INSERT INTO users (name, email, password_hash, activated)
