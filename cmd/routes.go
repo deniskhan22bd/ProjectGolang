@@ -16,7 +16,7 @@ func (app *application) routes() http.Handler {
 	r.HandleFunc("/books/{id:[0-9]+}", app.requirePermission("books:read", app.GetBook)).Methods("GET")
 	r.HandleFunc("/books/{id:[0-9]+}", app.requirePermission("books:write", app.UpdateBook)).Methods("PUT")
 	r.HandleFunc("/books/{id:[0-9]+}", app.requirePermission("books:delete", app.DeleteBook)).Methods("DELETE")
-	r.HandleFunc("/books/{id:[0-9]+}/subscribe", app.requirePermission("books:read", app.AddFavoriteBook)).Methods("POST")
+	r.HandleFunc("/books/{id:[0-9]+}/subscribe", app.requirePermission("books:read", app.SubcribeAtBook)).Methods("POST")
 
 	//Users handlers
 	r.HandleFunc("/users", app.registerUserHandler).Methods("POST")

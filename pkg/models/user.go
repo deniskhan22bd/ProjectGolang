@@ -38,6 +38,7 @@ type UserModel struct {
 
 // Define a custom ErrDuplicateEmail error.
 var (
+	ErrDuplicateSubscribing = errors.New("duplicate subscribing")
 	ErrDuplicateEmail = errors.New("duplicate email")
 	ErrRecordNotFound = errors.New("record not found")
 	ErrEditConflict   = errors.New("edit conflict")
@@ -59,8 +60,8 @@ func (m UserModel) Subcribe(book_id int, user_id int) error {
 	_, err := m.DB.ExecContext(ctx, query, args...)
 	if err != nil {
 		switch {
-		case err.Error() == `pq: duplicate key value violates unique constraint "users_email_key"`:
-			return ErrDuplicateEmail
+		case err.Error() == `pq: повторяющееся значение ключа нарушает ограничение уникальности "users_books_pkey"`:
+			return ErrDuplicateSubscribing
 		default:
 			return err
 		}

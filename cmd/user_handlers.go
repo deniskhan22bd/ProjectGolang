@@ -9,7 +9,7 @@ import (
 	"github.com/deniskhan22bd/Golang/ProjectGolang/pkg/validator"
 )
 
-func (app *application) AddFavoriteBook(w http.ResponseWriter, r *http.Request) {
+func (app *application) SubcribeAtBook(w http.ResponseWriter, r *http.Request) {
 	token, err := app.GetToken(w, r)
 	if err != nil {
 		app.invalidCredentialsResponse(w, r)
