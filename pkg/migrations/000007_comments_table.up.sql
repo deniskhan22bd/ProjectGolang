@@ -1,13 +1,13 @@
-create table if not exists comments(
-    id bigserial primary key,
-    comment text not NULL,
+CREATE TABLE IF NOT EXISTS comments (
+    id bigserial PRIMARY KEY,
+    comment text NOT NULL,
     created_at timestamp(0) with time zone NOT NULL DEFAULT NOW(),
     updated_at timestamp(0) with time zone NOT NULL DEFAULT NOW(),
-    user_id bigint NOT NULL REFERENCES users ON DELETE CASCADE,
-)
+    user_id bigint NOT NULL REFERENCES users ON DELETE CASCADE
+);
 
-create table if not exists comments_books(
-    comment_id bigint not NULL REFERENCES comments on DELETE CASCADE,
-    book_id bigint not NULL REFERENCES books on DELETE CASCADE,
-    primary key(comment_id, book_id)
-)
+CREATE TABLE IF NOT EXISTS comments_books (
+    comment_id bigint NOT NULL REFERENCES comments ON DELETE CASCADE,
+    book_id bigint NOT NULL REFERENCES books ON DELETE CASCADE,
+    PRIMARY KEY(comment_id, book_id)
+);
