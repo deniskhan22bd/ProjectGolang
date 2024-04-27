@@ -1,6 +1,6 @@
 # ProjectGolang
 
-## Library
+## Library REST Api
 Library application, where user can view book, subscribe and comment them.
 Token based authentication - Stateless tokens
 
