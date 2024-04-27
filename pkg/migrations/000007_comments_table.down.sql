@@ -1,2 +1,2 @@
-drop table if exists comments_books
-drop table if exists comments
+drop table comments_books;
+drop table comments

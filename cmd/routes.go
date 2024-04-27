@@ -20,7 +20,7 @@ func (app *application) routes() http.Handler {
 
 	//Users handlers
 	r.HandleFunc("/users", app.registerUserHandler).Methods("POST")
-	r.HandleFunc("/users/activate", app.activateUserHandler).Methods("POST")
+	r.HandleFunc("/users/activate", app.activateUserHandler).Methods("PUT")
 	r.HandleFunc("/users/login", app.createAuthenticationTokenHandler).Methods("POST")
 	r.HandleFunc("/users/favorite", app.requirePermission("books:read", app.GetFavoriteBooks)).Methods("GET")
 	http.Handle("/", r)

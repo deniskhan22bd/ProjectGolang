@@ -39,9 +39,9 @@ type UserModel struct {
 // Define a custom ErrDuplicateEmail error.
 var (
 	ErrDuplicateSubscribing = errors.New("duplicate subscribing")
-	ErrDuplicateEmail = errors.New("duplicate email")
-	ErrRecordNotFound = errors.New("record not found")
-	ErrEditConflict   = errors.New("edit conflict")
+	ErrDuplicateEmail       = errors.New("duplicate email")
+	ErrRecordNotFound       = errors.New("record not found")
+	ErrEditConflict         = errors.New("edit conflict")
 )
 
 // Check if a User instance is the AnonymousUser.
