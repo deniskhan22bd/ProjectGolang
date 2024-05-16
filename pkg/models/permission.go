@@ -78,3 +78,4 @@ func (m PermissionModel) AddForUser(userID int64, codes ...string) error {
 	_, err := m.DB.ExecContext(ctx, query, userID, pq.Array(codes))
 	return err
 }
+
