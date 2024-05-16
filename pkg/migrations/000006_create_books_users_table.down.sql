@@ -1,1 +1,1 @@
-drop table users_books
+drop table if exists users_books
