@@ -24,6 +24,13 @@ VALUES
 - PUT /books/:id
 - DELETE /books/:id
 
+#### COMMENTS
+- POST /books/:id/comments
+- GET /books/:id/comments
+- GET /comments/:id
+- PUT /comments/:id
+- DELETE /comments/:id
+
 ### DB STRUCTURE
 #### Table books
 - id: bigserial [primary key]
@@ -37,15 +44,21 @@ VALUES
 - id: bigserial [primary key]
 - name: varchar
 - surname: varchar
+- email: unique varchar
+- password_hash: bytea
+- activated: bool
 - created_at: timestamp 
 - updated_at: timestamp 
 
-#### Table users_and_books (many-to-many)
-- id: bigserial [primary key]
-- user_id: int 
-- book_id: int
+#### Table comments
+- id: serial [primary key]
+- content: text
+- book_id: int [foreign key(books)]
 - created_at: timestamp
 - updated_at: timestamp
 
-- Ref: Table users_and_books > users.id
-- Ref: Table users_and_books > books.id
+
+#### Table users_and_books (many-to-many)
+- id: bigserial [primary key]
+- user_id: int [foreign key(users)]
+- book_id: int [foreign key(books)]
