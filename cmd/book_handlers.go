@@ -95,6 +95,13 @@ func (app *application) CreateBook(w http.ResponseWriter, r *http.Request) {
 		PublishedYear: input.PublishedYear,
 	}
 
+	v := validator.New()
+
+	if models.ValidateBook(v, book); !v.Valid() {
+		app.failedValidationResponse(w, r, v.Errors)
+		return
+	}
+
 	err = app.models.Books.Insert(book)
 
 	if err != nil {
@@ -155,19 +162,6 @@ func (app *application) UpdateBook(w http.ResponseWriter, r *http.Request) {
 		app.badRequestResponse(w, r, err)
 		return
 	}
-
-	if input.Title != nil {
-		book.Title = *input.Title
-	}
-
-	if input.Author != nil {
-		book.Author = *input.Author
-	}
-
-	if input.PublishedYear != nil {
-		book.PublishedYear = *input.PublishedYear
-	}
-
 	v := validator.New()
 
 	if models.ValidateBook(v, book); !v.Valid() {

@@ -9,13 +9,30 @@ import (
 )
 
 func (app *application) GetCommentsByBookID(w http.ResponseWriter, r *http.Request) {
+	v := validator.New()
+	qs := r.URL.Query()
+	var input struct {
+		Content string
+		models.Filters
+	}
+
+	input.Content = app.readString(qs, "content", "")
+	input.Filters.Page = app.readInt(qs, "page", 1, v)
+	input.Filters.PageSize = app.readInt(qs, "page_size", 20, v)
+	input.Filters.Sort = app.readString(qs, "sort", "id")
+	input.Filters.SortSafelist = []string{"id", "created_at", "-created_at"}
+	if models.ValidateFilters(v, input.Filters); !v.Valid() {
+		app.failedValidationResponse(w, r, v.Errors)
+		return
+	}
+
 	id, err := app.readIDParam(r)
 	if err != nil || id < 1 {
 		app.notFoundResponse(w, r)
 		return
 	}
 
-	comments, err := app.models.Comments.GetByBookID(id)
+	comments, err := app.models.Comments.GetByBookID(input.Content, id, input.Filters)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 		return
@@ -71,6 +88,13 @@ func (app *application) CreateComment(w http.ResponseWriter, r *http.Request) {
 	comment := &models.Comment{
 		Content: input.Content,
 		BookID:  id,
+	}
+
+	v := validator.New()
+
+	if models.ValidateComment(v, comment); !v.Valid() {
+		app.failedValidationResponse(w, r, v.Errors)
+		return
 	}
 
 	err = app.models.Comments.Insert(comment)

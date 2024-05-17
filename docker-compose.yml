@@ -7,7 +7,7 @@ services:
     depends_on:
       - db
     environment:
-      DSN: "postgres://postgres:123@db:5432/golang_project?sslmode=disable"
+      DSN: "postgres://postgres:123@db:5432/golang_project?sslmode=disableсд"
 
     ports:
       - "8080:8080"

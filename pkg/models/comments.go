@@ -3,6 +3,7 @@ package models
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"log"
 	"time"
 
@@ -55,18 +56,20 @@ func (m CommentModel) Get(id int) (*Comment, error) {
 	return &comment, nil
 }
 
-func (m CommentModel) GetByBookID(bookID int) ([]*Comment, error) {
-	query := `
+func (m CommentModel) GetByBookID(content string, book_id int, filters Filters) ([]*Comment, error) {
+	query := fmt.Sprintf(`
 		SELECT id, content, book_id, created_at, updated_at
 		FROM comments
-		WHERE book_id = $1
-		ORDER BY created_at DESC
-	`
+		WHERE (to_tsvector('simple', content) @@ plainto_tsquery('simple', $1) OR $1 = '')
+		AND book_id = $2
+		ORDER BY %s %s, id ASC
+		LIMIT $3 OFFSET $4`, filters.sortColumn(), filters.sortDirection())
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
+	args := []interface{}{content, book_id, filters.limit(), filters.offset()}
 
-	rows, err := m.DB.QueryContext(ctx, query, bookID)
+	rows, err := m.DB.QueryContext(ctx, query, args...)
 	if err != nil {
 		return nil, err
 	}
