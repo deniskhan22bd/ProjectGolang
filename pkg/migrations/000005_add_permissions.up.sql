@@ -10,9 +10,13 @@ CREATE TABLE IF NOT EXISTS users_permissions (
 );
 
 -- Add the two permissions to the table.
+-- Add permissions to the table.
 INSERT INTO
     permissions (code)
 VALUES
     ('books:read'),
     ('books:write'),
-    ('books:delete')
+    ('books:delete'),
+    ('comments:read'),
+    ('comments:write'),
+    ('comments:delete');

@@ -18,6 +18,13 @@ func (app *application) routes() http.Handler {
 	r.HandleFunc("/books/{id:[0-9]+}", app.requirePermission("books:delete", app.DeleteBook)).Methods("DELETE")
 	r.HandleFunc("/books/{id:[0-9]+}/subscribe", app.requirePermission("books:read", app.SubcribeAtBook)).Methods("POST")
 
+	//Comments handlers
+	r.HandleFunc("/books/{id:[0-9]+}/comments", app.requirePermission("comments:read", app.GetCommentsByBookID)).Methods("GET")
+	r.HandleFunc("/books/{id:[0-9]+}/comments", app.requirePermission("comments:write", app.CreateComment)).Methods("POST")
+	r.HandleFunc("/comments/{id:[0-9]+}", app.requirePermission("comments:read", app.GetComment)).Methods("GET")
+	r.HandleFunc("/comments/{id:[0-9]+}", app.requirePermission("comments:write", app.UpdateComment)).Methods("PUT")
+	r.HandleFunc("/comments/{id:[0-9]+}", app.requirePermission("comments:delete", app.DeleteComment)).Methods("DELETE")
+
 	//Users handlers
 	r.HandleFunc("/users", app.registerUserHandler).Methods("POST")
 	r.HandleFunc("/users/activate", app.activateUserHandler).Methods("PUT")
